@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>io.github.olviia.paste-image-as-file</id>
+    <name>Paste Image as File</name>
+    <vendor url="https://github.com/olviia/paste-image-as-file">Olviia Stroivans</vendor>
+
+    <description><![CDATA[
+    Paste a screenshot or copied image straight into a folder of your project.
+    <br/><br/>
+    Select a folder (or a file in it) in the Project / Explorer tree and press <b>Ctrl+V</b>:
+    the clipboard image is saved there as <code>screenshot-2026-10-04-153012.png</code>.
+    No more saving the image somewhere, finding it, and dragging it into the project.
+    <br/><br/>
+    Only acts when the clipboard holds an image; pasting files or text works as before.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <applicationListeners>
+        <listener class="io.github.olviia.pasteimage.PasteImageWatcher"
+                  topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
+</idea-plugin>
