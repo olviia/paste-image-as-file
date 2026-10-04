@@ -11,7 +11,11 @@
     No more saving the image somewhere, finding it, and dragging it into the project.
     <br/><br/>
     Only acts when the clipboard holds an image; pasting files or text works as before.
+    <br/><br/>
+    <i>Tested on Rider 2026.2 (Explorer views, Unity project). Should work in the project tree of any JetBrains IDE.</i>
     ]]></description>
+
+    <change-notes><![CDATA[1.0.0: first Marketplace release, plugin icon.]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
 
