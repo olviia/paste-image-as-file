@@ -6,16 +6,17 @@
     <description><![CDATA[
     Paste a screenshot or copied image straight into a folder of your project.
     <br/><br/>
-    Select a folder (or a file in it) in the Project / Explorer tree and press <b>Ctrl+V</b>:
+    Select a folder (or a file in it) in the Project / Explorer tree and press <b>Ctrl+V</b>
+    (or <b>Cmd+V</b> on macOS):
     the clipboard image is saved there as <code>screenshot-2026-10-04-153012.png</code>.
     No more saving the image somewhere, finding it, and dragging it into the project.
     <br/><br/>
     Only acts when the clipboard holds an image; pasting files or text works as before.
     <br/><br/>
-    <i>Tested on Rider 2026.2 (Explorer views, Unity project). Should work in the project tree of any JetBrains IDE.</i>
+    <i>This build also supports JetBrains Remote Development by delegating the upload to the IDE's native file paste action.</i>
     ]]></description>
 
-    <change-notes><![CDATA[1.0.1: requires IDE 2025.3 or newer (2025.2 lacks an API the plugin uses).<br/>1.0.0: first Marketplace release, plugin icon.]]></change-notes>
+    <change-notes><![CDATA[Unreleased: support Remote Development and Cmd+V on macOS.<br/>1.0.1: requires IDE 2025.3 or newer.]]></change-notes>
 
     <depends>com.intellij.modules.platform</depends>
 
