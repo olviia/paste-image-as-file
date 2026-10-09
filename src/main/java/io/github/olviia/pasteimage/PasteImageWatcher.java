@@ -11,6 +11,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.WindowManager;
+import com.intellij.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JTree;
@@ -25,11 +26,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Turns Ctrl+V (or Shift+Insert) in a project tree into "save the clipboard image as a PNG in
- * the selected folder", when the clipboard holds an image.
+ * Turns a paste in a project tree into "save the clipboard image as a PNG".
  * <p>
- * Watches keys rather than the Paste action, because a file tree's own paste only knows files
- * and text and has no hook for images. Any other paste passes through untouched.
+ * In JetBrains Client, the normal paste event remains unconsumed so Remote Development can upload
+ * a temporary PNG through the same path it uses when a local file is pasted into a remote project.
  */
 public final class PasteImageWatcher implements AppLifecycleListener {
 
@@ -46,7 +46,7 @@ public final class PasteImageWatcher implements AppLifecycleListener {
         IdeEventQueue.getInstance().addDispatcher(PasteImageWatcher::onEvent, ApplicationManager.getApplication());
     }
 
-    /** Returns true when the key was used up as an image paste. */
+    /** Returns true when the key was used up as a local image paste. */
     private static boolean onEvent(@NotNull AWTEvent event) {
         if (!(event instanceof KeyEvent key)) return false;
         if (key.getID() == KeyEvent.KEY_TYPED && swallowTyped) {
@@ -57,6 +57,11 @@ public final class PasteImageWatcher implements AppLifecycleListener {
         try {
             Component focus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
             if (!isInTree(focus) || !ClipboardImage.isAvailable()) return false;
+            if (PlatformUtils.isJetBrainsClient()) {
+                exposeAsLocalFile();
+                return false;
+            }
+
             DataContext context = DataManager.getInstance().getDataContext(focus);
             Project project = CommonDataKeys.PROJECT.getData(context);
             VirtualFile folder = targetFolder(context);
@@ -68,6 +73,16 @@ public final class PasteImageWatcher implements AppLifecycleListener {
         } catch (RuntimeException e) {
             LOG.debug("paste failed: " + e);
             return false;
+        }
+    }
+
+    private static void exposeAsLocalFile() {
+        try {
+            String name = ImageFileNames.forPaste(LocalDateTime.now(), ignored -> false);
+            var file = ClipboardImage.exposeAsFile(name);
+            if (file != null) LOG.debug("exposed clipboard image as local file " + file.getName());
+        } catch (IOException e) {
+            LOG.warn("Failed to expose clipboard image as a local file", e);
         }
     }
 
@@ -105,9 +120,10 @@ public final class PasteImageWatcher implements AppLifecycleListener {
         return file.isDirectory() ? file : file.getParent();
     }
 
-    private static boolean isPasteKey(KeyEvent key) {
+    static boolean isPasteKey(KeyEvent key) {
         int mods = key.getModifiersEx() & MODIFIERS;
         return key.getKeyCode() == KeyEvent.VK_V && mods == InputEvent.CTRL_DOWN_MASK
+                || key.getKeyCode() == KeyEvent.VK_V && mods == InputEvent.META_DOWN_MASK
                 || key.getKeyCode() == KeyEvent.VK_INSERT && mods == InputEvent.SHIFT_DOWN_MASK;
     }
 
